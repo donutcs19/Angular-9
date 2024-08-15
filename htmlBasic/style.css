@@ -1,0 +1,29 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+thead {
+    background-color: aqua;
+}
+thead tr th {
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+tbody{
+    background-color: yellowgreen;
+}
+tbody tr td{
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.price{ 
+    text-align: center;
+    background-color: blue;
+    color: aliceblue;
+} 
+/* Class */
+#name{
+    color: aliceblue;
+}
+/* id */
