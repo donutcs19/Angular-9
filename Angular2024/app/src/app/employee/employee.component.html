@@ -1,0 +1,9 @@
+<p>employee works!</p>
+
+<div>name = {{name}}</div>
+<div>1 way binding</div>
+<input value="name"  /> <!--  แก้ที่เดียวไปที่เดียว -->
+<div [className]="cssClass">Content</div>
+
+<div>2 way binding</div> <!--  แก้ที่นี่ไปทั้งหมด -->
+<input [(ngModel)]="name"  />
