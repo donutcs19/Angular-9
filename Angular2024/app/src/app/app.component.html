@@ -1,4 +1,4 @@
-<div>Hello Shikikie {{ title }}</div>
+<!-- <div>Hello Shikikie {{ title }}</div>
 
 @if (isAdmin){
   <div>Your're Admin</div>
@@ -23,5 +23,30 @@
   click here for toggle
 </div>
 
-<button (click)="myFunction()">click Me Alert</button>
+<button (click)="myFunction()">click Me Alert</button> -->
+
+<!-- <app-employee [fullName] = "fullName"> </app-employee> -->
+
+<h1>Angular Router App</h1>
+<nav>
+  <ul>
+    <li>
+      <a href="/firstPage/10">First Page (Page is refresh)</a>  
+      
+    </li>
+    <li>
+      <a 
+      routerLink="/firstPage/10"
+      routerLinkAction="active"
+      ariaCurrentWhenActive="page">First Page (Page is'n refresh)</a>
+    </li>
+    <li>
+      <a 
+      routerLink="/secondPage"
+      routerLinkAction="active"
+      ariaCurrentWhenActive="page">Second Page</a>
+    </li>
+  </ul>
+</nav>
+<router-outlet></router-outlet>
 
