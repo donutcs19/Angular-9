@@ -27,4 +27,3 @@ export const routes: Routes = [
         component: ParentComponentComponent,
     },
 ];
-
