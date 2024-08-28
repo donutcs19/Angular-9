@@ -19,4 +19,29 @@ model Book {
   name String
   price Int
   detial String?
+  registerDate DateTime?
+  orderDetails OrderDetail[]
+}
+
+model Customer {
+  id Int @id() @default(autoincrement())
+  name String
+  phone String
+  address String
+  Order Order[]
+}
+
+model Order {
+  id Int @id() @default(autoincrement())
+  orderDate DateTime
+  payDate DateTime?
+  customerId Int
+  customer Customer @relation(fields: [customerId],references: [id])
+}
+
+model OrderDetail {
+  id Int @id() @default(autoincrement())
+  orderId Int
+  bookId Int
+  book Book @relation(fields: [bookId],references: [id])
 }

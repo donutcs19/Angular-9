@@ -8,6 +8,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
+
 app.get("/", (req, res) => {
   res.send("Hello Shikikie");
 });
@@ -239,6 +243,165 @@ app.post('/book/startWith', async (req, res) => {
       res.status(500).send({ error:e });
     }
   });
+
+  app.get('/book/sum', async (req, res) => {
+    try {
+      const data = await prisma.book.aggregate({
+        _sum: {
+          price : true
+        },
+      });
+
+      res.send({ results: data});
+    } catch (e) {
+      res.status(500).send({ error:e });
+    }
+  });
+
+  app.get('/book/max', async (req, res) => {
+    try {
+      const data = await prisma.book.aggregate({
+        _max: {
+          price : true
+        },
+      });
+
+      res.send({ results: data});
+    } catch (e) {
+      res.status(500).send({ error:e });
+    }
+  });
+
+  app.get('/book/min', async (req, res) => {
+    try {
+      const data = await prisma.book.aggregate({
+        _min: {
+          price : true
+        },
+      });
+
+      res.send({ results: data});
+    } catch (e) {
+      res.status(500).send({ error:e });
+    }
+  });
+
+  app.get('/book/avg', async (req, res) => {
+    try {
+      const data = await prisma.book.aggregate({
+        _avg: {
+          price : true
+        },
+      });
+
+      res.send({ results: data});
+    } catch (e) {
+      res.status(500).send({ error:e });
+    }
+  });
+
+app.get('/book/find-ydm', async (req, res) => {
+  try {
+    const data = await prisma.book.findMany({
+      where: {
+        registerDate: new Date("2024-05-09"),
+      },
+    });
+
+    res.send({ results: data });
+  } catch (e) {
+    res.status(500).send({error:e})
+  }
+});
+
+app.get('/book/find-yd', async (req, res) => {
+  try {
+    const data = await prisma.book.findMany({
+      where: {
+        registerDate:{
+          gte: new Date("2024-05-09"),
+          lte: new Date("2024-05-31"),
+        } 
+      },
+    });
+
+    res.send({ results: data });
+  } catch (e) {
+    res.status(500).send({ error:e })
+  }
+});
+
+app.get('/book/find-year', async (req, res) => {
+  try {
+    const data = await prisma.book.findMany({
+      where: {
+        registerDate:{
+          gte: new Date("2024-01-01"),
+          lte: new Date("2024-12-31"),
+        } ,
+      },
+    });
+
+    res.send({ results: data });
+  } catch (e) {
+    res.status(500).send({ error:e })
+  }
+});
+
+
+app.get('/user/createToken', (req, res) =>{
+try {
+  const secret = process.env.TOKEN_SECRET;
+  const payload = {
+    id: 100,
+    name: "Shikikie",
+    level: "admin",
+  };
+  const token = jwt.sign(payload, secret, {expiresIn: "1d"});
+
+  res.send({token: token});
+} catch (e) {
+  res.status(500).send({error: e})
+}
+});
+
+app.get('/user/verifyToken', (req, res) =>{
+  try {
+    const secret = process.env.TOKEN_SECRET;
+    const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwLCJuYW1lIjoiU2hpa2lraWUiLCJsZXZlbCI6ImFkbWluIiwiaWF0IjoxNzI0ODUzMzMxLCJleHAiOjE3MjQ5Mzk3MzF9.CCK2CfmtYT07739CrUJq5ofxN4ib4_SSh9etciP8Wj4"
+    
+    const result = jwt.verify(token, secret);
+  
+    res.send({results: result});
+  } catch (e) {
+    res.status(500).send({error: e})
+  }
+  });
+  
+function checkSignIn(req, res, next){
+  try {
+    const secret = process.env.TOKEN_SECRET;
+    const token = req.headers["authorization"];
+    const result = jwt.verify(token, secret);
+
+    if(result != undefined){
+      next();
+    }
+  } catch (e) {
+    console.log(e)
+    res.status(500).send({error: e.message});
+  }
+}
+
+app.get("/user/info", checkSignIn, (req, res, next) => {
+  try {
+    res.send('hello Shikikie')
+  } catch (error) {
+    read.status(500).send({error: e});
+  }
+});
+
 
 app.listen(3003, () =>{
   console.log("Server Starting... -> http://localhost:3003");
