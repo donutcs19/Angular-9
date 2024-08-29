@@ -12,6 +12,81 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
+const fileUpload = require('express-fileupload');
+
+const bookController = require('./controller/BookController');
+
+
+app.use("/book", bookController);
+app.use("/uploads", express.static("uploads"));
+app.use(fileUpload());
+
+app.post("/book/testUpload", (req, res) => {
+try {
+  const myFile = req.files.myFile;
+
+  myFile.mv("./uploads" + myFile.name, (err) => {
+    if(err){
+      res.status(500).send({ error: err });
+    }
+    res.send({ message: "success" });
+  });
+} catch (e) {
+  res.status(500).send({ error: e.message });
+}
+
+});
+
+app.get('/readFile', (req, res) => {
+  try {
+    const fs = require('fs');
+    fs.readFile('test.txt', (err, data) => {
+      if (err){
+        throw err;
+      }
+      res.send(data);
+    })
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+})
+
+app.get('/writeFile', (req, res) => {
+  try {
+    const fs = require('fs');
+    fs.writeFile('test.txt','Shikikie Node.js', (err) => {
+      if (err){
+        throw err;
+      }
+      res.send({message : "success"});
+    })
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+})
+
+app.get('/removeFile', (req, res) => {
+  try {
+    const fs = require('fs');
+    fs.unlinkSync("test.txt");
+    res.send({message : "success"});
+    
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+})
+
+app.get('/fileExists', (req, res) => {
+  try {
+    const fs = require('fs');
+    const found = fs.existsSync("package.json")
+    res.send({found: found});
+    
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+})
+
 app.get("/", (req, res) => {
   res.send("Hello Shikikie");
 });
@@ -398,10 +473,53 @@ app.get("/user/info", checkSignIn, (req, res, next) => {
   try {
     res.send('hello Shikikie')
   } catch (error) {
-    read.status(500).send({error: e});
+    res.status(500).send({error: e});
   }
 });
 
+app.get('/oneToOne', async(req, res) => {
+  try {
+    const data = await prisma.orderDetail.findMany({
+      include: {
+        book: true
+      }
+    });
+    res.send({ results : data})
+  } catch (e) {
+    res.status(500).send({error: e});
+  }
+});
+
+app.get('/oneToMany', async(req, res) => {
+  try {
+    const data = await prisma.book.findMany({
+      include: {
+        orderDetails: true
+      }
+    });
+    res.send({ results : data})
+  } catch (e) {
+    res.status(500).send({error: e});
+  }
+});
+
+app.get("/multiModel", async (req, res) => {
+try {
+  const data = await prisma.customer.findMany({
+    include: {
+      Order: {
+        include: {
+          orderDetail: true,
+        },
+      },
+    },
+  });
+
+  res.send({ results: data });
+} catch (e) {
+  res.status(500).send({error: e});
+}
+});
 
 app.listen(3003, () =>{
   console.log("Server Starting... -> http://localhost:3003");
