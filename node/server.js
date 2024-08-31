@@ -15,17 +15,40 @@ dotenv.config();
 const fileUpload = require('express-fileupload');
 
 const bookController = require('./controller/BookController');
-
-
+const cprs = require('cors');
+add.use(cors());
 app.use("/book", bookController);
 app.use("/uploads", express.static("uploads"));
 app.use(fileUpload());
+
+app.get("/date", (req, res) => {
+  const date = new Date();
+  const day = String(date.getDate());
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มจาก 0, ดังนั้นต้องบวก 1
+  const year = String(date.getFullYear());
+  const hour = String(date.getHours());
+  const min = String(date.getMinutes());
+  const sec = String(date.getSeconds());
+
+const formattedDate = `${day}${month}${year}_${hour}${min}${sec}`;  
+
+res.send("Date is : "+ formattedDate);
+})
 
 app.post("/book/testUpload", (req, res) => {
 try {
   const myFile = req.files.myFile;
 
-  myFile.mv("./uploads" + myFile.name, (err) => {
+  const date = new Date().toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' });
+  const day = String(date.getDate());
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มจาก 0, ดังนั้นต้องบวก 1
+  const year = date.getFullYear();
+  const min = date.getUTCMinutes();
+  const sec = date.getUTCSeconds();
+
+const formattedDate = `${day}${month}${year}_${min}${sec}`;  
+
+  myFile.mv("./uploads/" + formattedDate +".jpg", (err) => {
     if(err){
       res.status(500).send({ error: err });
     }
@@ -86,6 +109,49 @@ app.get('/fileExists', (req, res) => {
     res.status(500).send({ error: e.message });
   }
 })
+
+app.get('/createPdf', (req, res) => {
+  try {
+    const PDFDocument = require('pdfkit');
+    const fs = require('fs');
+    const doc = new PDFDocument();
+
+doc.pipe(fs.createWriteStream('output.pdf'));
+doc.font('Kodchasan/Kodchasan-BoldItalic.ttf').fontSize(25).text("สวัสดีทดสอบภาษาไทย font!", 100, 100);
+doc.addPage().fontSize(25).text("สวัสดีทดสอบภาษาไทยหน้า 2",100, 100);
+doc.end();
+
+res.send({ message: "success" });
+  } catch (e) {
+    res.send(500).send({error: e.message})
+  }
+});
+
+app.get('/readExcel', async (req, res) => {
+try {
+  const excel = require("exceljs");
+  const wb = new excel.Workbook();
+  await wb.xlsx.readFile('Book1.xlsx');
+  const ws = wb.getWorksheet(1);
+
+  for (let i = 1; i <= ws.rowCount; i++) {
+    const row = ws.getRow(i);
+    const barcode = row.getCell(1).value;
+    const name = row.getCell(2).value;
+    const cost = row.getCell(3).value;
+    const sale = row.getCell(4).value;
+    const send = row.getCell(5).value;
+    const unit = row.getCell(6).value;
+    const point = row.getCell(7).value;
+    const productTypeId = row.getCell(8).value;
+
+    console.log(barcode, name, cost, sale, send, unit, point, productTypeId);
+  }
+res.send({ message: "success" });
+} catch (e) {
+  res.send(500).send({ error: e.message });
+}
+});
 
 app.get("/", (req, res) => {
   res.send("Hello Shikikie");
